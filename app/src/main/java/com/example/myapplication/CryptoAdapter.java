@@ -1,6 +1,7 @@
 package com.example.myapplication;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +32,7 @@ public class CryptoAdapter extends RecyclerView.Adapter<CryptoAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+
         CryptoCurrency crypto = cryptoList.get(position);
         holder.tvCryptoName.setText(crypto.getName());
         holder.tvCryptoSymbol.setText(crypto.getSymbol());
@@ -48,6 +50,17 @@ public class CryptoAdapter extends RecyclerView.Adapter<CryptoAdapter.ViewHolder
                 .load(crypto.getImage())
                 .placeholder(R.drawable.ic_placeholder)
                 .into(holder.ivCryptoLogo);
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, CryptoDetailActivity.class);
+                intent.putExtra("selectedCrypto", crypto); // Agrega esta línea para incluir el objeto selectedCrypto
+                intent.putExtra("CRYPTO_NAME", crypto.getName());
+                intent.putExtra("CRYPTO_IMAGE", crypto.getImage());
+                context.startActivity(intent);
+            }
+        });
     }
 
     @Override
