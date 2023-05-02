@@ -1,12 +1,8 @@
 package com.example.myapplication;
 import androidx.appcompat.app.AppCompatActivity;
-
-import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.bumptech.glide.Glide;
 import com.example.myapplication.models.CryptoCurrency;
 import com.github.mikephil.charting.charts.LineChart;
@@ -15,8 +11,12 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class CryptoDetailActivity extends AppCompatActivity {
     private ImageView ivCryptoDetailLogo;
@@ -63,7 +63,18 @@ public class CryptoDetailActivity extends AppCompatActivity {
         tvLow24h.setText(String.format("$%,.2f", selectedCrypto.getLow24h()));
         tvCirculatingSupply.setText(String.format("%,.2f", selectedCrypto.getCirculatingSupply()));
         tvTotalSupply.setText(String.format("%,.2f", selectedCrypto.getTotalSupply()));
-        tvLastUpdated.setText(selectedCrypto.getLastUpdated());
+
+        String lastUpdatedString = selectedCrypto.getLastUpdated();
+        SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
+        SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        try {
+            Date lastUpdatedDate = inputFormat.parse(lastUpdatedString);
+            String formattedLastUpdated = outputFormat.format(lastUpdatedDate);
+            tvLastUpdated.setText(formattedLastUpdated);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            tvLastUpdated.setText(lastUpdatedString); // En caso de error, muestra la fecha sin formato
+        }
 
         Glide.with(this)
                 .load(cryptoImage)

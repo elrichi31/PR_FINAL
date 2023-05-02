@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -12,15 +14,19 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.myapplication.models.CryptoCurrency;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class CryptoAdapter extends RecyclerView.Adapter<CryptoAdapter.ViewHolder> {
+public class CryptoAdapter extends RecyclerView.Adapter<CryptoAdapter.ViewHolder> implements Filterable {
     private List<CryptoCurrency> cryptoList;
     private Context context;
+    private List<CryptoCurrency> filteredCryptoList;
+
 
     public CryptoAdapter(Context context, List<CryptoCurrency> cryptoList) {
         this.context = context;
         this.cryptoList = cryptoList;
+        this.filteredCryptoList = new ArrayList<>(cryptoList);
     }
 
     @NonNull
@@ -33,7 +39,7 @@ public class CryptoAdapter extends RecyclerView.Adapter<CryptoAdapter.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
-        CryptoCurrency crypto = cryptoList.get(position);
+        CryptoCurrency crypto = filteredCryptoList.get(position);
         holder.tvCryptoName.setText(crypto.getName());
         holder.tvCryptoSymbol.setText(crypto.getSymbol());
         holder.tvCryptoPrice.setText(String.format("$%,.2f", crypto.getCurrentPrice()));
@@ -65,7 +71,38 @@ public class CryptoAdapter extends RecyclerView.Adapter<CryptoAdapter.ViewHolder
 
     @Override
     public int getItemCount() {
-        return cryptoList.size();
+        return filteredCryptoList.size();
+    }
+
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                List<CryptoCurrency> filteredList = new ArrayList<>();
+                if (constraint == null || constraint.length() == 0) {
+                    filteredList.addAll(cryptoList);
+                } else {
+                    String filterPattern = constraint.toString().toLowerCase().trim();
+                    for (CryptoCurrency crypto : cryptoList) {
+                        if (crypto.getName().toLowerCase().contains(filterPattern)) {
+                            filteredList.add(crypto);
+                        }
+                    }
+                }
+
+                FilterResults results = new FilterResults();
+                results.values = filteredList;
+                return results;
+            }
+
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+                filteredCryptoList.clear();
+                filteredCryptoList.addAll((List) results.values);
+                notifyDataSetChanged();
+            }
+        };
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

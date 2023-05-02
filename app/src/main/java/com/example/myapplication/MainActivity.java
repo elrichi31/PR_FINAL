@@ -2,6 +2,9 @@ package com.example.myapplication;
 
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.widget.EditText;
 import android.widget.Toast;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -18,17 +21,37 @@ public class MainActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private CryptoAdapter cryptoAdapter;
+    private EditText etSearch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        etSearch = findViewById(R.id.et_search);
+
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         fetchDataFromApi();
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Filtra la lista de criptomonedas según la consulta de búsqueda
+                cryptoAdapter.getFilter().filter(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+
     }
+
 
     private void fetchDataFromApi() {
         String baseUrl = "https://api.coingecko.com/";
