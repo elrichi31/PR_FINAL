@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.widget.EditText;
 import android.widget.Toast;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -11,6 +12,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.myapplication.api.CoinGeckoApi;
 import com.example.myapplication.models.CryptoCurrency;
 import com.example.myapplication.network.RetrofitClient;
+import android.os.Handler;
+
 
 import java.util.List;
 import retrofit2.Call;
@@ -22,6 +25,8 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private CryptoAdapter cryptoAdapter;
     private EditText etSearch;
+    private Handler handler;
+    private Runnable refreshDataRunnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,7 +38,17 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        fetchDataFromApi();
+        handler = new Handler();
+        refreshDataRunnable = new Runnable() {
+            @Override
+            public void run() {
+                fetchDataFromApi();
+                handler.postDelayed(this, 5 * 60 * 1000); // 5 minutos en milisegundos
+                Log.i("API", "Datos recibidos");
+            }
+        };
+        handler.post(refreshDataRunnable);
+
         etSearch.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -52,6 +67,14 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (handler != null && refreshDataRunnable != null) {
+            handler.removeCallbacks(refreshDataRunnable);
+        }
+    }
+
 
     private void fetchDataFromApi() {
         String baseUrl = "https://api.coingecko.com/";
@@ -63,8 +86,16 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call<List<CryptoCurrency>> call, Response<List<CryptoCurrency>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<CryptoCurrency> cryptoList = response.body();
-                    cryptoAdapter = new CryptoAdapter(MainActivity.this, cryptoList);
-                    recyclerView.setAdapter(cryptoAdapter);
+                    if (cryptoAdapter == null) {
+                        cryptoAdapter = new CryptoAdapter(MainActivity.this, cryptoList);
+                        recyclerView.setAdapter(cryptoAdapter);
+                    } else {
+                        cryptoAdapter.updateCryptoList(cryptoList);
+                        cryptoAdapter.notifyDataSetChanged();
+                        Toast.makeText(MainActivity.this, "Data retrived", Toast.LENGTH_SHORT).show();
+
+                    }
+
                 } else {
                     Toast.makeText(MainActivity.this, "Error al obtener datos", Toast.LENGTH_SHORT).show();
                 }

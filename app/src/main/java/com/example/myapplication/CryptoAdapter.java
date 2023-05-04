@@ -105,6 +105,12 @@ public class CryptoAdapter extends RecyclerView.Adapter<CryptoAdapter.ViewHolder
         };
     }
 
+    public void updateCryptoList(List<CryptoCurrency> newCryptoList) {
+        cryptoList.clear();
+        cryptoList.addAll(newCryptoList);
+        notifyDataSetChanged(); // Notificar que los datos han cambiado
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder {
         ImageView ivCryptoLogo;
         TextView tvCryptoName;

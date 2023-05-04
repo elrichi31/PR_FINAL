@@ -87,6 +87,12 @@ public class CryptoDetailActivity extends AppCompatActivity {
             priceData.add(new Entry(i, (float) (Math.random() * 20000)));
         }
         setupChart(priceData);
+        // Datos reales para la grifica
+//        List<Entry> priceData = new ArrayList<>();
+//        for (int i = 0; i < selectedCrypto.getSparklineIn7D().size(); i++) {
+//            priceData.add(new Entry(i, selectedCrypto.getSparklineIn7D().get(i).floatValue()));
+//        }
+//        setupChart(priceData);
     }
 
 
